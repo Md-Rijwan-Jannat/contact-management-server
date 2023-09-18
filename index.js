@@ -30,6 +30,7 @@ async function run() {
     try {
         await client.connect();
 
+        // <---------------------- user apis ------------------>
         // post users
         app.post('/users', async (req, res) => {
             const user = req.body;
@@ -43,7 +44,9 @@ async function run() {
             res.send(result);
         })
 
-        //   Contacts Apis  
+
+
+        //<------------------- Contacts Apis -------------------------> 
 
         // post contacts
         app.post('/contacts', async (req, res) => {
@@ -57,20 +60,42 @@ async function run() {
             const result = await contactsCollection.insertOne(user);
             res.send(result);
         })
+
+
         // get contacts
         app.get('/my-contacts', async (req, res) => {
-            const email = req.query.email;
-            const query = {user_email: email}
-            const myContacts = await contactsCollection.find(query).toArray();
+            const myContacts = await contactsCollection.find().toArray();
             res.send(myContacts);
         })
+
+
         // get contacts
         app.delete('/my-contacts/delete', async (req, res) => {
             const id = req.query.id;
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const deleteContacts = await contactsCollection.deleteOne(query);
             res.send(deleteContacts);
         })
+
+
+        app.post('/my-contacts', async (req, res) => {
+            const { _id, name, email, number, spoc, date } = req.body;
+            console.log('update data', { _id, name, email, number, spoc, date }); // Log the individual variables
+            const filter = { _id: new ObjectId(_id) };
+            const updateDocs = {
+                $set: {
+                    name: name,
+                    email: email,
+                    spoc: spoc,
+                    number: number,
+                    date: date,
+                }
+            };
+            const result = await contactsCollection.updateOne(filter, updateDocs); // Use updateOne
+            res.send(result);
+        });
+        
+
 
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
