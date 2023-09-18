@@ -63,8 +63,10 @@ async function run() {
 
 
         // get contacts
-        app.get('/my-contacts', async (req, res) => {
-            const myContacts = await contactsCollection.find().toArray();
+        app.get('/my-contacts/', async (req, res) => {
+            const email = req.query.email;
+            const filter = { user_email: email };
+            const myContacts = await contactsCollection.find(filter).toArray();
             res.send(myContacts);
         })
 
@@ -94,7 +96,7 @@ async function run() {
             const result = await contactsCollection.updateOne(filter, updateDocs); // Use updateOne
             res.send(result);
         });
-        
+
 
 
         await client.db("admin").command({ ping: 1 });
